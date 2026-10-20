@@ -18,14 +18,13 @@ $('application').addEventListener('submit',async e=>{e.preventDefault();const fo
 $('login-form').addEventListener('submit',async e=>{e.preventDefault();if(!client)return $('staff-status').textContent='Backend not configured';const d=Object.fromEntries(new FormData(e.currentTarget));$('staff-status').textContent='Signing in…';const {data,error}=await client.auth.signInWithPassword({email:d.email,password:d.password});if(error)return $('staff-status').textContent=error.message;token=data.session.access_token;await load()});
 async function load(){const r=await fetch('/api/applications',{headers:{authorization:'Bearer '+token}});const d=await r.json();if(!r.ok){$('staff-status').textContent=d.error||'Access denied';return}$('login').classList.add('hidden');$('dashboard').classList.remove('hidden');$('staff-status').textContent='';const root=$('applications');root.replaceChildren();if(!d.applications.length){root.textContent='No applications yet.';return}for(const a of d.applications){const card=document.createElement('div');card.className='admin-app';const title=document.createElement('h3');title.textContent=a.epic_username+' — '+a.current_rank;card.append(title);const fields=[['Status',a.status],['Discord',a.discord_username],['Peak rank',a.peak_rank],['Age',a.age],['Region',a.region],['Platform',a.platform],['Hours played',a.hours_played],['Why join?',a.motivation],['Tournament experience',a.tournament_experience],['Practice availability',a.practice_availability]];for(const [label,value] of fields){const p=document.createElement('p');const b=document.createElement('strong');b.textContent=label+': ';p.append(b,document.createTextNode(String(value)));card.append(p)}const actions=document.createElement('div');actions.className='admin-actions';for(const [status,cls] of [['accepted','blue'],['rejected',''],['pending','outline']]){const b=document.createElement('button');b.className=cls;b.textContent=status[0].toUpperCase()+status.slice(1);b.addEventListener('click',async()=>{b.disabled=true;const r=await fetch('/api/applications/'+a.id,{method:'PATCH',headers:{'content-type':'application/json',authorization:'Bearer '+token},body:JSON.stringify({status})});if(r.ok)await load();else{const x=await r.json();alert(x.error||'Update failed');b.disabled=false}});actions.append(b)}card.append(actions);root.append(card)}}
 $('refresh').addEventListener('click',load);$('logout').addEventListener('click',async()=>{await client?.auth.signOut();token=null;$('login').classList.remove('hidden');$('dashboard').classList.add('hidden');$('staff-status').textContent='Signed out.'});
+
 const bgVideo=document.querySelector('.hero video');
-const clips=['/My%20Movie%204.mov','/My%20Movie%203.mov','/nK2lsZpEXUhdtNrid.mov'];
-let clipIndex=0;
-bgVideo.addEventListener('ended',()=>{
-  clipIndex=(clipIndex+1)%clips.length;
-  bgVideo.src=clips[clipIndex];
-  bgVideo.load();
-  bgVideo.play().catch(()=>{});
-});
+bgVideo.loop=true;
+bgVideo.muted=true;
+bgVideo.src='/My%20Movie%206-720p60.mov';
+bgVideo.load();
+bgVideo.play().catch(()=>{});
+
   init();subscribers();setInterval(subscribers,60000);
 </script></body></html>
